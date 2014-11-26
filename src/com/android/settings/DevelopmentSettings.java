@@ -195,6 +195,7 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
     private Preference mClearAdbKeys;
     private SwitchPreference mEnableTerminal;
     private Preference mRestartSystemUI;
+
     private Preference mBugreport;
     private SwitchPreference mBugreportInPower;
     private SwitchPreference mKeepScreenOn;
@@ -237,22 +238,22 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
 
     private ListPreference mSimulateColorSpace;
 
-    private SwitchPreference mUseAwesomePlayer;
+    private SwitchPreference mUseNuplayer;
     private SwitchPreference mUSBAudio;
     private SwitchPreference mImmediatelyDestroyActivities;
 
     private ListPreference mAppProcessLimit;
 
     private SwitchPreference mShowAllANRs;
-    private CheckBoxPreference mKillAppLongpressBack;
+    private SwitchPreference mKillAppLongpressBack;
     private AnimationScalePreference mKillAppLongpressDelay;
 
-    private CheckBoxPreference mAdvancedReboot;
+    private SwitchPreference mAdvancedReboot;
 
     private PreferenceScreen mProcessStats;
     private final ArrayList<Preference> mAllPrefs = new ArrayList<Preference>();
 
-    private final ArrayList<SwitchPreference> mResetSwitchPrefs
+    private final ArrayList<SwitchPreference> mResetSpPrefs
             = new ArrayList<SwitchPreference>();
 
     private final HashSet<Preference> mDisabledPrefs = new HashSet<Preference>();
@@ -318,7 +319,7 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
         mDebugViewAttributes = findAndInitSwitchPref(DEBUG_VIEW_ATTRIBUTES);
         mPassword = (PreferenceScreen) findPreference(LOCAL_BACKUP_PASSWORD);
         mAllPrefs.add(mPassword);
-        mAdvancedReboot = findAndInitCheckboxPref(ADVANCED_REBOOT_KEY);
+        mAdvancedReboot = findAndInitSwitchPref(ADVANCED_REBOOT_KEY);
 
 
         if (!android.os.Process.myUserHandle().equals(UserHandle.OWNER)) {
@@ -363,8 +364,9 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
         mOverlayDisplayDevices = addListPreference(OVERLAY_DISPLAY_DEVICES_KEY);
         mOpenGLTraces = addListPreference(OPENGL_TRACES_KEY);
         mSimulateColorSpace = addListPreference(SIMULATE_COLOR_SPACE);
-        mUseAwesomePlayer = findAndInitSwitchPref(USE_AWESOMEPLAYER_KEY);
+        mUseNuplayer = findAndInitSwitchPref(USE_NUPLAYER_KEY);
         mUSBAudio = findAndInitSwitchPref(USB_AUDIO_KEY);
+
         mWindowAnimationScale = findAndInitAnimationScalePreference(WINDOW_ANIMATION_SCALE_KEY);
         mTransitionAnimationScale = findAndInitAnimationScalePreference(TRANSITION_ANIMATION_SCALE_KEY);
         mAnimatorDurationScale = findAndInitAnimationScalePreference(ANIMATOR_DURATION_SCALE_KEY);
@@ -372,15 +374,15 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
         mImmediatelyDestroyActivities = (SwitchPreference) findPreference(
                 IMMEDIATELY_DESTROY_ACTIVITIES_KEY);
         mAllPrefs.add(mImmediatelyDestroyActivities);
-        mResetSwitchPrefs.add(mImmediatelyDestroyActivities);
+        mResetSpPrefs.add(mImmediatelyDestroyActivities);
 
         mAppProcessLimit = addListPreference(APP_PROCESS_LIMIT_KEY);
 
         mShowAllANRs = (SwitchPreference) findPreference(
                 SHOW_ALL_ANRS_KEY);
         mAllPrefs.add(mShowAllANRs);
-        mResetSwitchPrefs.add(mShowAllANRs);
-        mKillAppLongpressBack = findAndInitCheckboxPref(KILL_APP_LONGPRESS_BACK);
+        mResetSpPrefs.add(mShowAllANRs);
+        mKillAppLongpressBack = findAndInitSwitchPref(KILL_APP_LONGPRESS_BACK);
         mKillAppLongpressDelay = findAndInitAnimationScalePreference(LONG_PRESS_KILL_DELAY);
 
         Preference hdcpChecking = findPreference(HDCP_CHECKING_KEY);
@@ -414,14 +416,13 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
         mAllPrefs.add(pref);
         return pref;
     }
-
-    private CheckBoxPreference findAndInitCheckboxPref(String key) {
-        CheckBoxPreference pref = (CheckBoxPreference) findPreference(key);
+    private SwitchPreference findAndInitSwitchPref(String key) {
+        SwitchPreference pref = (SwitchPreference) findPreference(key);
         if (pref == null) {
             throw new IllegalArgumentException("Cannot find preference with key = " + key);
         }
         mAllPrefs.add(pref);
-        mResetSwitchPrefs.add(pref);
+        mResetSpPrefs.add(pref);
         return pref;
     }
 
@@ -517,8 +518,8 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
         mSwitchBar.hide();
     }
 
-    void updateSwitchPreference(SwitchPreference switchPreference, boolean value) {
-        switchPreference.setChecked(value);
+    void updateSwitchPref(SwitchPreference switchPref, boolean value) {
+    	switchPref.setChecked(value);
         mHaveDebugSettings |= value;
     }
 
@@ -526,27 +527,27 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
         final Context context = getActivity();
         final ContentResolver cr = context.getContentResolver();
         mHaveDebugSettings = false;
-        updateSwitchPreference(mEnableAdb, Settings.Global.getInt(cr,
+        updateSwitchPref(mEnableAdb, Settings.Global.getInt(cr,
                 Settings.Global.ADB_ENABLED, 0) != 0);
         mAdbNotify.setChecked(Settings.Secure.getInt(cr,
                 Settings.Secure.ADB_NOTIFY, 1) != 0);
         if (mEnableTerminal != null) {
-            updateSwitchPreference(mEnableTerminal,
+            updateSwitchPref(mEnableTerminal,
                     context.getPackageManager().getApplicationEnabledSetting(TERMINAL_APP_PACKAGE)
                             == PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
         }
-        updateSwitchPreference(mBugreportInPower, Settings.Secure.getInt(cr,
+        updateSwitchPref(mBugreportInPower, Settings.Secure.getInt(cr,
                 Settings.Secure.BUGREPORT_IN_POWER_MENU, 0) != 0);
-        updateSwitchPreference(mKeepScreenOn, Settings.Global.getInt(cr,
+        updateSwitchPref(mKeepScreenOn, Settings.Global.getInt(cr,
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0) != 0);
-        updateSwitchPreference(mBtHciSnoopLog, Settings.Secure.getInt(cr,
+        updateSwitchPref(mBtHciSnoopLog, Settings.Secure.getInt(cr,
                 Settings.Secure.BLUETOOTH_HCI_LOG, 0) != 0);
         if (mEnableOemUnlock != null) {
-            updateSwitchPreference(mEnableOemUnlock, Utils.isOemUnlockEnabled(getActivity()));
+            updateSwitchPref(mEnableOemUnlock, Utils.isOemUnlockEnabled(getActivity()));
         }
-        updateSwitchPreference(mAllowMockLocation, Settings.Secure.getInt(cr,
+        updateSwitchPref(mAllowMockLocation, Settings.Secure.getInt(cr,
                 Settings.Secure.ALLOW_MOCK_LOCATION, 0) != 0);
-        updateSwitchPreference(mDebugViewAttributes, Settings.Global.getInt(cr,
+        updateSwitchPref(mDebugViewAttributes, Settings.Global.getInt(cr,
                 Settings.Global.DEBUG_VIEW_ATTRIBUTES, 0) != 0);
         updateHdcpValues();
         updatePasswordSummary();
@@ -597,11 +598,11 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
 
     private void resetDangerousOptions() {
         mDontPokeProperties = true;
-        for (int i=0; i< mResetSwitchPrefs.size(); i++) {
-            SwitchPreference cb = mResetSwitchPrefs.get(i);
-            if (cb.isChecked()) {
-                cb.setChecked(false);
-                onPreferenceTreeClick(null, cb);
+        for (int i=0; i<mResetSpPrefs.size(); i++) {
+            SwitchPreference sp = mResetSpPrefs.get(i);
+            if (sp.isChecked()) {
+                sp.setChecked(false);
+                onPreferenceTreeClick(null, sp);
             }
         }
         resetDebuggerOptions();
@@ -691,7 +692,7 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
     private void updateDebuggerOptions() {
         mDebugApp = Settings.Global.getString(
                 getActivity().getContentResolver(), Settings.Global.DEBUG_APP);
-        updateSwitchPreference(mWaitForDebugger, Settings.Global.getInt(
+        updateSwitchPref(mWaitForDebugger, Settings.Global.getInt(
                 getActivity().getContentResolver(), Settings.Global.WAIT_FOR_DEBUGGER, 0) != 0);
         if (mDebugApp != null && mDebugApp.length() > 0) {
             String label;
@@ -713,7 +714,7 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
     }
 
     private void updateVerifyAppsOverUsbOptions() {
-        updateSwitchPreference(mVerifyAppsOverUsb, Settings.Global.getInt(getActivity().getContentResolver(),
+        updateSwitchPref(mVerifyAppsOverUsb, Settings.Global.getInt(getActivity().getContentResolver(),
                 Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, 1) != 0);
         mVerifyAppsOverUsb.setEnabled(enableVerifierSetting());
     }
@@ -793,7 +794,7 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
     }
 
     private void updateStrictModeVisualOptions() {
-        updateSwitchPreference(mStrictMode, currentStrictModeActiveIndex() == 1);
+        updateSwitchPref(mStrictMode, currentStrictModeActiveIndex() == 1);
     }
 
     private void writePointerLocationOptions() {
@@ -802,7 +803,7 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
     }
 
     private void updatePointerLocationOptions() {
-        updateSwitchPreference(mPointerLocation, Settings.System.getInt(getActivity().getContentResolver(),
+        updateSwitchPref(mPointerLocation, Settings.System.getInt(getActivity().getContentResolver(),
                 Settings.System.POINTER_LOCATION, 0) != 0);
     }
 
@@ -812,7 +813,7 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
     }
 
     private void updateShowTouchesOptions() {
-        updateSwitchPreference(mShowTouches, Settings.System.getInt(getActivity().getContentResolver(),
+        updateSwitchPref(mShowTouches, Settings.System.getInt(getActivity().getContentResolver(),
                 Settings.System.SHOW_TOUCHES, 0) != 0);
     }
 
@@ -830,11 +831,11 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
                 @SuppressWarnings("unused")
                 int enableGL = reply.readInt();
                 int showUpdates = reply.readInt();
-                updateSwitchPreference(mShowScreenUpdates, showUpdates != 0);
+                updateSwitchPref(mShowScreenUpdates, showUpdates != 0);
                 @SuppressWarnings("unused")
                 int showBackground = reply.readInt();
                 int disableOverlays = reply.readInt();
-                updateSwitchPreference(mDisableOverlays, disableOverlays != 0);
+                updateSwitchPref(mDisableOverlays, disableOverlays != 0);
                 reply.recycle();
                 data.recycle();
             }
@@ -877,7 +878,7 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
     }
 
     private void updateHardwareUiOptions() {
-        updateSwitchPreference(mForceHardwareUi, SystemProperties.getBoolean(HARDWARE_UI_PROPERTY, false));
+        updateSwitchPref(mForceHardwareUi, SystemProperties.getBoolean(HARDWARE_UI_PROPERTY, false));
     }
 
     private void writeHardwareUiOptions() {
@@ -886,7 +887,7 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
     }
 
     private void updateMsaaOptions() {
-        updateSwitchPreference(mForceMsaa, SystemProperties.getBoolean(MSAA_PROPERTY, false));
+        updateSwitchPref(mForceMsaa, SystemProperties.getBoolean(MSAA_PROPERTY, false));
     }
 
     private void writeMsaaOptions() {
@@ -946,7 +947,7 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
     }
 
     private void updateShowHwScreenUpdatesOptions() {
-        updateSwitchPreference(mShowHwScreenUpdates,
+        updateSwitchPref(mShowHwScreenUpdates,
                 SystemProperties.getBoolean(HardwareRenderer.DEBUG_DIRTY_REGIONS_PROPERTY, false));
     }
 
@@ -957,7 +958,7 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
     }
 
     private void updateShowHwLayersUpdatesOptions() {
-        updateSwitchPreference(mShowHwLayersUpdates, SystemProperties.getBoolean(
+        updateSwitchPref(mShowHwLayersUpdates, SystemProperties.getBoolean(
                 HardwareRenderer.DEBUG_SHOW_LAYERS_UPDATES_PROPERTY, false));
     }
 
@@ -993,7 +994,7 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
     }
 
     private void updateDebugLayoutOptions() {
-        updateSwitchPreference(mDebugLayout,
+        updateSwitchPref(mDebugLayout,
                 SystemProperties.getBoolean(View.DEBUG_LAYOUT_PROPERTY, false));
     }
 
@@ -1059,8 +1060,8 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
     }
 
     private void updateUseNuplayerOptions() {
-        updateSwitchPreference(
-                mUseAwesomePlayer, SystemProperties.getBoolean(USE_AWESOMEPLAYER_PROPERTY, false));
+        updateSwitchPref(
+                mUseNuplayer, !SystemProperties.getBoolean(USE_AWESOMEPLAYER_PROPERTY, false));
     }
 
     private void writeUseAwesomePlayerOptions() {
@@ -1070,7 +1071,7 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
     }
 
     private void updateUSBAudioOptions() {
-        updateSwitchPreference(mUSBAudio, Settings.Secure.getInt(getContentResolver(),
+        updateSwitchPref(mUSBAudio, Settings.Secure.getInt(getContentResolver(),
                 Settings.Secure.USB_AUDIO_AUTOMATIC_ROUTING_DISABLED, 0) != 0);
     }
 
@@ -1081,7 +1082,7 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
     }
 
     private void updateForceRtlOptions() {
-        updateSwitchPreference(mForceRtlLayout, Settings.Global.getInt(getActivity().getContentResolver(),
+        updateSwitchPref(mForceRtlLayout, Settings.Global.getInt(getActivity().getContentResolver(),
                 Settings.Global.DEVELOPMENT_FORCE_RTL, 0) != 0);
     }
 
@@ -1094,7 +1095,7 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
     }
 
     private void updateWifiDisplayCertificationOptions() {
-        updateSwitchPreference(mWifiDisplayCertification, Settings.Global.getInt(
+        updateSwitchPref(mWifiDisplayCertification, Settings.Global.getInt(
                 getActivity().getContentResolver(),
                 Settings.Global.WIFI_DISPLAY_CERTIFICATION_ON, 0) != 0);
     }
@@ -1107,7 +1108,7 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
 
     private void updateWifiVerboseLoggingOptions() {
         boolean enabled = mWifiManager.getVerboseLoggingLevel() > 0;
-        updateSwitchPreference(mWifiVerboseLogging, enabled);
+        updateSwitchPref(mWifiVerboseLogging, enabled);
     }
 
     private void writeWifiVerboseLoggingOptions() {
@@ -1116,7 +1117,7 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
 
     private void updateWifiAggressiveHandoverOptions() {
         boolean enabled = mWifiManager.getAggressiveHandover() > 0;
-        updateSwitchPreference(mWifiAggressiveHandover, enabled);
+        updateSwitchPref(mWifiAggressiveHandover, enabled);
     }
 
     private void writeWifiAggressiveHandoverOptions() {
@@ -1125,7 +1126,7 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
 
     private void updateWifiAllowScansWithTrafficOptions() {
         boolean enabled = mWifiManager.getAllowScansWithTraffic() > 0;
-        updateSwitchPreference(mWifiAllowScansWithTraffic, enabled);
+        updateSwitchPref(mWifiAllowScansWithTraffic, enabled);
     }
 
     private void writeWifiAllowScansWithTrafficOptions() {
@@ -1182,7 +1183,7 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
     }
 
     private void updateCpuUsageOptions() {
-        updateSwitchPreference(mShowCpuUsage, Settings.Global.getInt(getActivity().getContentResolver(),
+        updateSwitchPref(mShowCpuUsage, Settings.Global.getInt(getActivity().getContentResolver(),
                 Settings.Global.SHOW_PROCESSES, 0) != 0);
     }
 
@@ -1208,8 +1209,8 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
     }
 
     private void updateImmediatelyDestroyActivitiesOptions() {
-        updateSwitchPreference(mImmediatelyDestroyActivities, Settings.Global.getInt(
-                getActivity().getContentResolver(), Settings.Global.ALWAYS_FINISH_ACTIVITIES, 0) != 0);
+        updateSwitchPref(mImmediatelyDestroyActivities, Settings.Global.getInt(
+            getActivity().getContentResolver(), Settings.Global.ALWAYS_FINISH_ACTIVITIES, 0) != 0);
     }
 
     private void updateAnimationScaleValue(int which, AnimationScalePreference pref) {
@@ -1342,26 +1343,8 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
     }
 
     private void updateShowAllANRsOptions() {
-        updateSwitchPreference(mShowAllANRs, Settings.Secure.getInt(
-                getActivity().getContentResolver(), Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0);
-    }
-
-    private void confirmEnableOemUnlock() {
-        DialogInterface.OnClickListener onConfirmListener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Utils.setOemUnlockEnabled(getActivity(), true);
-                updateAllOptions();
-            }
-        };
-
-        new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.confirm_enable_oem_unlock_title)
-                .setMessage(R.string.confirm_enable_oem_unlock_text)
-                .setPositiveButton(R.string.enable_text, onConfirmListener)
-                .setNegativeButton(android.R.string.cancel, null)
-                .create()
-                .show();
+        updateSwitchPref(mShowAllANRs, Settings.Secure.getInt(
+            getActivity().getContentResolver(), Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0);
     }
 
     @Override
