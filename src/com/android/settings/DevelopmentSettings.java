@@ -370,6 +370,7 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
         mOpenGLTraces = addListPreference(OPENGL_TRACES_KEY);
         mSimulateColorSpace = addListPreference(SIMULATE_COLOR_SPACE);
         mUseNuplayer = findAndInitSwitchPref(USE_NUPLAYER_KEY);
+        mAllPrefs.add(mUseNuplayer);
         mUSBAudio = findAndInitSwitchPref(USB_AUDIO_KEY);
 
         mWindowAnimationScale = findAndInitAnimationScalePreference(WINDOW_ANIMATION_SCALE_KEY);
@@ -627,6 +628,7 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
         resetDebuggerOptions();
         writeLogdSizeOption(null);
         resetDevelopmentShortcutOptions();
+        resetUseNuplayerOptions();
         writeAnimationScaleOption(0, mWindowAnimationScale, null);
         writeAnimationScaleOption(1, mTransitionAnimationScale, null);
         writeAnimationScaleOption(2, mAnimatorDurationScale, null);
@@ -642,6 +644,10 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
         mDontPokeProperties = false;
         pokeSystemProperties();
         mShowUnacAndOvercounted.setChecked(false);
+    }
+
+    private void resetUseNuplayerOptions() {
+        SystemProperties.set(USE_AWESOMEPLAYER_PROPERTY, "0");
     }
 
     private void updateHdcpValues() {
