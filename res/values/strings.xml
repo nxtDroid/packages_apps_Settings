@@ -4809,6 +4809,11 @@
     <!-- UI debug setting: simulate color space anomalies. [CHAR LIMIT=25] -->
     <string name="simulate_color_space">Simulate color space</string>
 
+    <!-- UI debug setting: force use of NuPlayer [CHAR LIMIT=25] -->
+    <string name="use_nuplayer">Use NuPlayer (experimental)</string>
+    <!-- UI debug setting: force use of NuPlayer summary [CHAR LIMIT=50] -->
+    <string name="use_nuplayer_summary">Use NuPlayer instead of AwesomePlayer</string>
+
     <!-- UI debug setting: enable various types of OpenGL traces [CHAR LIMIT=25] -->
     <string name="enable_opengl_traces_title">Enable OpenGL traces</string>
 
